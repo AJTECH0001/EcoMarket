@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@zetachain/toolkit/contracts/BytesHelperLib.sol";
 import "@zetachain/toolkit/contracts/OnlySystem.sol";
 
-contract NFT is zContract, ERC721, ERC721URIStorage, OnlySystem {
+contract NFT is ERC721, ERC721URIStorage, OnlySystem, zContract {
     SystemContract public systemContract;
     error CallerNotOwnerNotApproved();
     uint256 constant BITCOIN = 18332;
@@ -20,6 +20,8 @@ contract NFT is zContract, ERC721, ERC721URIStorage, OnlySystem {
     }
 
     mapping(uint256 => NFTMetadata) public nftMetadata;
+    mapping(uint256 => uint256) public tokenAmounts; // Mapping from tokenId to the amount of resource
+    mapping(uint256 => uint256) public tokenChains; // Mapping from tokenId to the chain ID
 
     uint256 private _nextTokenId;
 
@@ -34,7 +36,7 @@ contract NFT is zContract, ERC721, ERC721URIStorage, OnlySystem {
         uint256 wasteUnits,
         bytes calldata message,
         string calldata wasteType
-    ) external override onlySystem(systemContract) {
+    ) external onlySystem(systemContract) {
         address recipient;
 
         if (context.chainID == BITCOIN) {
@@ -55,6 +57,8 @@ contract NFT is zContract, ERC721, ERC721URIStorage, OnlySystem {
         uint256 tokenId = _nextTokenId;
         _safeMint(recipient, tokenId);
         nftMetadata[tokenId] = NFTMetadata(wasteUnits, wasteType, chainId);
+        tokenAmounts[tokenId] = wasteUnits; // Initialize the amount
+        tokenChains[tokenId] = chainId; // Initialize the chain ID
         _setTokenURI(tokenId, string(abi.encodePacked("metadata/", tokenId))); // Replace with your metadata logic
         _nextTokenId++;
     }
@@ -78,7 +82,30 @@ contract NFT is zContract, ERC721, ERC721URIStorage, OnlySystem {
         delete nftMetadata[tokenId];
     }
 
-    function tokenURI(uint256 tokenId) public view override(ERC721, ERC721URIStorage) returns (string memory) {
+    // Override the _burn function from both ERC721 and ERC721URIStorage
+    function _burn(
+        uint256 tokenId
+    ) internal override(ERC721, ERC721URIStorage) {
+        super._burn(tokenId);
+    }
+
+    // Override the supportsInterface function from both ERC721 and ERC721URIStorage
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view override(ERC721, ERC721URIStorage) returns (bool) {
+        return super.supportsInterface(interfaceId);
+    }
+
+    function tokenURI(
+        uint256 tokenId
+    ) public view override(ERC721, ERC721URIStorage) returns (string memory) {
         return super.tokenURI(tokenId);
     }
+
+    function onCrossChainCall(
+        zContext calldata context,
+        address zrc20,
+        uint256 amount,
+        bytes calldata message
+    ) external override {}
 }
