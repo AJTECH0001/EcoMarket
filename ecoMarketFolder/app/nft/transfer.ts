@@ -1,4 +1,4 @@
-import { abi } from "@zetachain/example-contracts/abi/omnichain/NFT.sol/NFT.json"
+import { abi } from "../abi/EcoMarket.sol/NFT.json"
 import { ethers } from "ethers"
 import { useAccount } from "wagmi"
 

@@ -1,5 +1,5 @@
 import { useFeesContext } from "@/context/FeesContext"
-import { abi } from "@zetachain/example-contracts/abi/omnichain/NFT.sol/NFT.json"
+import { abi } from "../abi/EcoMarket.sol/NFT.json"
 import { ethers } from "ethers"
 import { useAccount } from "wagmi"
 
@@ -13,7 +13,7 @@ export const useBurn = () => {
     assetsUpdating,
     setAssetsUpdating,
     setAssetsBurned,
-    omnichainContract,
+    ecoMarketContract,
   } = useNFT()
   const { setInbounds, inbounds } = useFeesContext()
   const { address } = useAccount()
@@ -28,14 +28,14 @@ export const useBurn = () => {
       ): Promise<boolean | void> => {
         try {
           const approved = await contract.getApproved(id)
-          if (approved.toLowerCase() === omnichainContract.toLowerCase()) {
+          if (approved.toLowerCase() === ecoMarketContract.toLowerCase()) {
             return true
           } else {
-            await contract.approve(omnichainContract, id)
+            await contract.approve(ecoMarketContract, id)
             for (let i = 0; i < 5; i++) {
               await new Promise((resolve) => setTimeout(resolve, 5000))
               const approved = await contract.getApproved(id)
-              if (approved.toLowerCase() === omnichainContract.toLowerCase()) {
+              if (approved.toLowerCase() === ecoMarketContract.toLowerCase()) {
                 return true
               }
             }
@@ -60,7 +60,7 @@ export const useBurn = () => {
       }
 
       setAssetsUpdating((b: any) => (b.includes(id) ? b : [...b, id]))
-      const contract = new ethers.Contract(omnichainContract, abi, signer)
+      const contract = new ethers.Contract(ecoMarketContract, abi, signer)
       if (await checkApproval(id, contract)) {
         const cctxHash = await contract.burnNFT(parseInt(id), address)
         await checkNFTOwnership(id, contract)

@@ -1,4 +1,4 @@
-import { abi } from "@zetachain/example-contracts/abi/omnichain/NFT.sol/NFT.json"
+import { abi } from "../abi/EcoMarket.sol/NFT.json"
 import { getEndpoints } from "@zetachain/networks"
 import { ethers } from "ethers"
 import { gql, request } from "graphql-request"

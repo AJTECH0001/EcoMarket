@@ -14,7 +14,7 @@ export const NFTProvider = ({ children }: any) => {
   const [recipient, setRecipient] = useState<any>("")
   const [foreignCoins, setForeignCoins] = useState<any>([])
 
-  const omnichainContract = "0x63aAD7e827845CE56370d36A61eF859522b771Cc"
+  const omnichainContract = "0x0228C786A3A7d55C8f70433722FFCEcCb7a62D80"
 
   const fetchForeignCoins = async () => {
     try {
