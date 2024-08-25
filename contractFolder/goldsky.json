@@ -2,17 +2,17 @@
   "version": "1",
   "name": "NFTMarketplace",
   "abis": {
-    "NFT": {
+    "NFTMarketplace": {
       "path": "artifacts/contracts/EcoMarket.sol/NFTMarketplace.json"
-    }
+    } 
   },
   "chains": ["zetachain-testnet"],
   "instances": [
     {
       "abi": "NFTMarketplace",
-      "address": "0x1ccd40AE07266fC4f8EfDbFfDB148faB25a08e3c", // Your contract address
+      "address": "0x1ccd40AE07266fC4f8EfDbFfDB148faB25a08e3c", 
       "chain": "zetachain-testnet",
-      "startBlock": 6483982 // The block number that your contract was deployed on
+      "startBlock": 6483982 
     }
   ]
 }
