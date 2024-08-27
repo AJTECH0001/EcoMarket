@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { JSXElementConstructor, Key, PromiseLikeOfReactNode, ReactElement, ReactNode, ReactPortal, useEffect } from "react"
 import { useCCTXsContext } from "@/context/CCTXsContext"
 import { AnimatePresence, motion } from "framer-motion"
 import { debounce } from "lodash"
@@ -94,9 +94,10 @@ const NFTPage = () => {
       <h1 className="text-4xl font-bold tracking-tight text-gray-900">  
         NFT Library  
       </h1>  
-      <Button size="icon" variant="primary" onClick={fetchNFTs}>  
-        <RefreshCw className={`h-5 w-5 ${assetsReloading ? "animate-spin" : ""}`} />  
-      </Button>  
+      <Button size="icon" variant="default" onClick={fetchNFTs}>
+  <RefreshCw className={`h-5 w-5 ${assetsReloading ? "animate-spin" : ""}`} />
+</Button>
+ 
     </div>  
   
     <div className="flex flex-wrap justify-center gap-6 mt-10">  
@@ -108,22 +109,22 @@ const NFTPage = () => {
           onChange={(e) => setAmount(e.target.value)}  
           className="text-5xl font-semibold bg-gray-100 border border-gray-300 focus:outline-none focus:ring focus:ring-blue-500"  
         />  
-        <Select onValueChange={(e) => setSelectedChain(e)} className="mt-4">  
-          <SelectTrigger className="w-full bg-gray-100 border border-gray-300 text-2xl font-semibold">  
-            <SelectValue placeholder="Select Token" />  
-          </SelectTrigger>  
-          <SelectContent className="shadow-lg rounded-lg">  
-            {coins.map((c) => (  
-              <SelectItem key={c.chain_id} value={c.chain_id}>  
-                {c.symbol}  
-              </SelectItem>  
-            ))}  
-          </SelectContent>  
-        </Select>  
+       <Select onValueChange={(e) => setSelectedChain(e)}>
+  <SelectTrigger className="w-full bg-gray-100 border border-gray-300 text-2xl font-semibold">
+    <SelectValue placeholder="Select Token" />
+  </SelectTrigger>
+  <SelectContent className="shadow-lg rounded-lg">
+    {coins.map((c: { chain_id: Key | null | undefined; symbol: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | PromiseLikeOfReactNode | null | undefined }) => (
+      <SelectItem key={c.chain_id} value={String(c.chain_id || '')}>
+        {c.symbol}
+      </SelectItem>
+    ))}
+  </SelectContent>
+</Select>
         <div className="flex justify-center mt-4">  
           {wrongNetwork ? (  
             <Button  
-              variant="primary"  
+                
               disabled={!(amount > 0) || !selectedChain || mintingInProgress}  
               onClick={() => mint(selectedChain)}  
             >  
@@ -146,90 +147,91 @@ const NFTPage = () => {
       </div>  
   
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">  
-        <AnimatePresence>  
-          {assets.length > 0 &&  
-            assets.map((asset) => {  
-              if (assetsBurned.includes(asset.id)) return null;  
-              return (  
-                <motion.div  
-                  layout  
-                  initial={{ opacity: 0 }}  
-                  animate={{ opacity: 1 }}  
-                  exit={{ opacity: 0 }}  
-                  transition={{ duration: 0.5 }}  
-                  className="bg-white rounded-xl shadow-lg p-4 overflow-hidden"  
-                  key={asset.id}  
-                >  
-                  <Popover>  
-                    <PopoverTrigger>  
-                      <Tilt lineGlareBlurAmount="40px" scale={1.05}>  
-                        <div className={`relative h-60 rounded-xl overflow-hidden ${colors[asset?.chain]} p-4`}>  
-                          <div className={`absolute top-0 left-0 w-full h-full flex items-center justify-center transition-opacity ${assetsUpdating.includes(asset.id) ? "opacity-100" : "opacity-0"}`}>  
-                            <Loader className="text-white animate-spin" size={48} />  
-                          </div>  
-                          <p className="text-5xl font-semibold text-transparent bg-clip-text tracking-tight bg-gradient-to-br from-gray-900 to-transparent text-shadow">  
-                            {formatAmount(asset?.amount)}  
-                          </p>  
-                          <p className="text-3xl font-semibold text-transparent bg-clip-text bg-gradient-to-br from-gray-900 to-transparent">  
-                            {coins.find(c => c.chain_id === asset?.chain)?.symbol}  
-                          </p>  
-                          <p className="text-3xl font-semibold text-transparent bg-clip-text bg-gradient-to-br from-gray-900 to-transparent mt-4">  
-                            # {asset.id}  
-                          </p>  
-                        </div>  
-                      </Tilt>  
-                    </PopoverTrigger>  
-                    <PopoverContent  
-                      sideOffset={-20}  
-                      className="w-full p-0 bg-white shadow-lg rounded-lg border-none"  
-                    >  
-                      {chain?.id === 7001 ? (  
-                        <div className="flex gap-2">  
-                          <Button  
-                            disabled={assetsUpdating.includes(asset.id)}  
-                            onClick={() => burn(asset.id)}  
-                            className="hover:bg-red-500"  
-                          >  
-                            <Flame className="h-4 w-4" />  
-                          </Button>  
-                          <Popover>  
-                            <PopoverTrigger asChild>  
-                              <Button className="hover:bg-blue-500">  
-                                <Send className="h-4 w-4" />  
-                              </Button>  
-                            </PopoverTrigger>  
-                            <PopoverContent className="bg-white w-64 rounded-xl p-4 shadow-lg border-none">  
-                              <Input  
-                                disabled={assetsUpdating.includes(asset.id)}  
-                                placeholder="Recipient address"  
-                                value={recipient}  
-                                onChange={(e) => setRecipient(e.target.value)}  
-                                className="mb-2"  
-                              />  
-                              <Button  
-                                disabled={assetsUpdating.includes(asset.id)}  
-                                variant="outline"  
-                                onClick={() => transfer(asset.id)}  
-                              >  
-                                Transfer asset  
-                              </Button>  
-                            </PopoverContent>  
-                          </Popover>  
-                        </div>  
-                      ) : (  
-                        <Button  
-                          variant="secondary"  
-                          onClick={() => switchNetwork && switchNetwork(7001)}  
-                        >  
-                          Switch Network  
-                        </Button>  
-                      )}  
-                    </PopoverContent>  
-                  </Popover>  
-                </motion.div>  
-              );  
-            })}  
-        </AnimatePresence>  
+      <AnimatePresence>
+  {assets.length > 0 &&
+    assets.map((asset: { id: string | number | null | undefined; chain: string | number; amount: any }) => {
+      if (assetsBurned.includes(asset.id)) return null;
+      return (
+        <motion.div
+          layout
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.5 }}
+          className="bg-white rounded-xl shadow-lg p-4 overflow-hidden"
+          key={asset.id} // Ensure `asset.id` is string or number
+        >
+          <Popover>
+            <PopoverTrigger>
+              <Tilt lineGlareBlurAmount="40px" scale={1.05}>
+                <div className={`relative h-60 rounded-xl overflow-hidden ${colors[asset?.chain]} p-4`}>
+                  <div className={`absolute top-0 left-0 w-full h-full flex items-center justify-center transition-opacity ${assetsUpdating.includes(asset.id) ? "opacity-100" : "opacity-0"}`}>
+                    <Loader className="text-white animate-spin" size={48} />
+                  </div>
+                  <p className="text-5xl font-semibold text-transparent bg-clip-text tracking-tight bg-gradient-to-br from-gray-900 to-transparent text-shadow">
+                    {formatAmount(asset?.amount)}
+                  </p>
+                  <p className="text-3xl font-semibold text-transparent bg-clip-text bg-gradient-to-br from-gray-900 to-transparent">
+                    {coins.find((c: { chain_id: string | number }) => c.chain_id === asset?.chain)?.symbol}
+                  </p>
+                  <p className="text-3xl font-semibold text-transparent bg-clip-text bg-gradient-to-br from-gray-900 to-transparent mt-4">
+                    # {asset.id}
+                  </p>
+                </div>
+              </Tilt>
+            </PopoverTrigger>
+            <PopoverContent
+              sideOffset={-20}
+              className="w-full p-0 bg-white shadow-lg rounded-lg border-none"
+            >
+              {chain?.id === 7001 ? (
+                <div className="flex gap-2">
+                  <Button
+                    disabled={assetsUpdating.includes(asset.id)}
+                    onClick={() => burn(asset.id)}
+                    className="hover:bg-red-500"
+                  >
+                    <Flame className="h-4 w-4" />
+                  </Button>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button className="hover:bg-blue-500">
+                        <Send className="h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="bg-white w-64 rounded-xl p-4 shadow-lg border-none">
+                      <Input
+                        disabled={assetsUpdating.includes(asset.id)}
+                        placeholder="Recipient address"
+                        value={recipient}
+                        onChange={(e) => setRecipient(e.target.value)}
+                        className="mb-2"
+                      />
+                      <Button
+                        disabled={assetsUpdating.includes(asset.id)}
+                        variant="outline"
+                        onClick={() => transfer(asset.id)}
+                      >
+                        Transfer asset
+                      </Button>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              ) : (
+                <Button
+                  variant="secondary"
+                  onClick={() => switchNetwork && switchNetwork(7001)}
+                >
+                  Switch Network
+                </Button>
+              )}
+            </PopoverContent>
+          </Popover>
+        </motion.div>
+      );
+    })}
+</AnimatePresence>
+ 
       </div>  
     </div>  
   </div>
