@@ -89,208 +89,150 @@ const NFTPage = () => {
   }
 
   return (
-    <div className="px-4  mt-12">
-      <div className="flex items-center justify-start gap-2 mb-6">
-        <h1 className="leading-10 text-2xl font-bold tracking-tight">
-          NFT Library
-        </h1>
-        <Button size="icon" variant="ghost" onClick={fetchNFTs}>
-          <RefreshCw
-            className={`h-4 w-4 ${assetsReloading && "animate-spin"}`}
-          />
-        </Button>
-      </div>
-      <div className="flex flex-wrap gap-5 mt-10">
-        <div>
-          <div className="h-60 w-44 rounded-xl p-4 shadow-2xl shadow-gray-300">
-            <Input
-              placeholder="0"
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              className="text-4xl font-semibold bg-transparent border-none"
-            />
-            <Select onValueChange={(e) => setSelectedChain(e)}>
-              <SelectTrigger className="w-full border-none bg-transparent text-2xl font-semibold placeholder:text-red-500">
-                <SelectValue placeholder="TOKEN" />
-              </SelectTrigger>
-              <SelectContent className="shadow-2xl border-none rounded-lg">
-                {coins.map((c: any) => (
-                  <SelectItem key={c.chain_id} value={c.chain_id}>
-                    {c.symbol}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex justify-center -translate-y-[50%]">
-            {wrongNetwork ? (
-              <Button
-                variant="ghost"
-                className="transition-all duration-100 ease-out hover:bg-white disabled:opacity-1 disabled:text-zinc-400 active:scale-95 shadow-2xl shadow-gray-500 rounded-full bg-white"
-                disabled={!(amount > 0) || !selectedChain || mintingInProgress}
-                onClick={() => mint(selectedChain)}
-              >
-                {mintingInProgress ? (
-                  <Loader className="h-4 w-4 mr-1 animate-spin-slow" />
-                ) : (
-                  <Sparkles className="h-4 w-4 mr-1" />
-                )}
-                Mint
-              </Button>
-            ) : (
-              <Button
-                variant="ghost"
-                className="transition-all duration-100 ease-out hover:bg-white disabled:opacity-1 disabled:text-zinc-400 active:scale-95 shadow-2xl shadow-gray-500 rounded-full bg-white"
-                onClick={() => {
-                  handleSwitchNetwork()
-                }}
-              >
-                Switch Network
-              </Button>
-            )}
-          </div>
-        </div>
-        <AnimatePresence>
-          {assets.length > 0 &&
-            assets.map((asset: any) => {
-              return (
-                !assetsBurned.includes(asset.id) && (
-                  <motion.div
-                    layout
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className="flex flex-col gap-2"
-                    key={asset.id}
-                  >
-                    <Popover>
-                      <PopoverTrigger>
-                        <Tilt lineGlareBlurAmount="40px" scale={1.05}>
-                          <div
-                            className={`text-left relative h-60 w-44 rounded-xl overflow-hidden p-4 ${
-                              colors[asset?.chain]
-                            }`}
-                          >
-                            <div
-                              className={`pointer-events-none	transition-all duration-500 bg-black/[.75] w-full h-full absolute top-0 left-0 flex items-center justify-center opacity-${
-                                assetsUpdating.includes(asset.id) ? 100 : 0
-                              }`}
-                            >
-                              <Loader
-                                className="absolute text-white/[.25] animate-spin-slow"
-                                size={48}
-                              />
-                            </div>
-
-                            <p
-                              className="text-4xl font-semibold
-                             text-transparent bg-clip-text tracking-tight
-                             bg-gradient-to-br from-white to-transparent
-                             text-shadow"
-                            >
-                              {formatAmount(asset?.amount)}
-                            </p>
-                            <div
-                              className="text-2xl font-semibold
-                             text-transparent bg-clip-text
-                             bg-gradient-to-br from-white to-transparent
-                             text-shadow"
-                            >
-                              {
-                                coins.find(
-                                  (c: any) => c.chain_id == asset?.chain
-                                ).symbol
-                              }
-                            </div>
-                            <div
-                              className="text-2xl font-semibold
-                             text-transparent bg-clip-text
-                             bg-gradient-to-br from-white to-transparent
-                             text-shadow mt-5"
-                            >
-                              # {asset.id}
-                            </div>
-                          </div>
-                        </Tilt>
-                      </PopoverTrigger>
-                      <PopoverContent
-                        sideOffset={-20}
-                        className="p-0 w-full transition-all duration-200 ease-linear shadow-2xl shadow-gray-500 rounded-full bg-white border-none"
-                      >
-                        {chain?.id === 7001 ? (
-                          <div>
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              disabled={assetsUpdating.includes(asset.id)}
-                              onClick={() => {
-                                burn(asset.id)
-                              }}
-                              className="hover:bg-transparent hover:text-rose-500"
-                            >
-                              <Flame className="h-4 w-4" />
-                            </Button>
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  className="hover:bg-transparent hover:text-sky-500"
-                                >
-                                  <Send className="h-4 w-4" />
-                                </Button>
-                              </PopoverTrigger>
-                              <PopoverContent
-                                align="center"
-                                className="bg-white w-64 -ml-10 rounded-xl p-2 shadow-2xl border-none"
-                              >
-                                <div className="flex flex-col gap-2">
-                                  <Input
-                                    disabled={assetsUpdating.includes(asset.id)}
-                                    placeholder="Recipient address"
-                                    value={recipient}
-                                    onChange={(e) =>
-                                      setRecipient(e.target.value)
-                                    }
-                                  />
-                                  <Button
-                                    disabled={assetsUpdating.includes(asset.id)}
-                                    variant="outline"
-                                    onClick={() => transfer(asset.id)}
-                                  >
-                                    Transfer asset
-                                  </Button>
-                                </div>
-                              </PopoverContent>
-                            </Popover>
-                          </div>
-                        ) : (
-                          <div>
-                            <Button
-                              variant="ghost"
-                              className="transition-all duration-100 ease-out hover:bg-white disabled:opacity-1 disabled:text-zinc-400 active:scale-95 shadow-2xl shadow-gray-500 rounded-full bg-white"
-                              onClick={() =>
-                                switchNetwork && switchNetwork(7001)
-                              }
-                            >
-                              Switch Network
-                            </Button>
-                          </div>
-                        )}
-                      </PopoverContent>
-                    </Popover>
-                  </motion.div>
-                )
-              )
-            })}
-        </AnimatePresence>
-      </div>
-
-      
-     
-    </div>
+    <div className="px-4 mt-12">  
+    <div className="flex items-center justify-between mb-6">  
+      <h1 className="text-4xl font-bold tracking-tight text-gray-900">  
+        NFT Library  
+      </h1>  
+      <Button size="icon" variant="primary" onClick={fetchNFTs}>  
+        <RefreshCw className={`h-5 w-5 ${assetsReloading ? "animate-spin" : ""}`} />  
+      </Button>  
+    </div>  
+  
+    <div className="flex flex-wrap justify-center gap-6 mt-10">  
+      <div className="bg-white rounded-xl shadow-lg p-6 w-96">  
+        <Input  
+          placeholder="0"  
+          type="number"  
+          value={amount}  
+          onChange={(e) => setAmount(e.target.value)}  
+          className="text-5xl font-semibold bg-gray-100 border border-gray-300 focus:outline-none focus:ring focus:ring-blue-500"  
+        />  
+        <Select onValueChange={(e) => setSelectedChain(e)} className="mt-4">  
+          <SelectTrigger className="w-full bg-gray-100 border border-gray-300 text-2xl font-semibold">  
+            <SelectValue placeholder="Select Token" />  
+          </SelectTrigger>  
+          <SelectContent className="shadow-lg rounded-lg">  
+            {coins.map((c) => (  
+              <SelectItem key={c.chain_id} value={c.chain_id}>  
+                {c.symbol}  
+              </SelectItem>  
+            ))}  
+          </SelectContent>  
+        </Select>  
+        <div className="flex justify-center mt-4">  
+          {wrongNetwork ? (  
+            <Button  
+              variant="primary"  
+              disabled={!(amount > 0) || !selectedChain || mintingInProgress}  
+              onClick={() => mint(selectedChain)}  
+            >  
+              {mintingInProgress ? (  
+                <Loader className="h-5 w-5 mr-2 animate-spin" />  
+              ) : (  
+                <Sparkles className="h-5 w-5 mr-2" />  
+              )}  
+              Mint  
+            </Button>  
+          ) : (  
+            <Button  
+              variant="secondary"  
+              onClick={handleSwitchNetwork}  
+            >  
+              Switch Network  
+            </Button>  
+          )}  
+        </div>  
+      </div>  
+  
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">  
+        <AnimatePresence>  
+          {assets.length > 0 &&  
+            assets.map((asset) => {  
+              if (assetsBurned.includes(asset.id)) return null;  
+              return (  
+                <motion.div  
+                  layout  
+                  initial={{ opacity: 0 }}  
+                  animate={{ opacity: 1 }}  
+                  exit={{ opacity: 0 }}  
+                  transition={{ duration: 0.5 }}  
+                  className="bg-white rounded-xl shadow-lg p-4 overflow-hidden"  
+                  key={asset.id}  
+                >  
+                  <Popover>  
+                    <PopoverTrigger>  
+                      <Tilt lineGlareBlurAmount="40px" scale={1.05}>  
+                        <div className={`relative h-60 rounded-xl overflow-hidden ${colors[asset?.chain]} p-4`}>  
+                          <div className={`absolute top-0 left-0 w-full h-full flex items-center justify-center transition-opacity ${assetsUpdating.includes(asset.id) ? "opacity-100" : "opacity-0"}`}>  
+                            <Loader className="text-white animate-spin" size={48} />  
+                          </div>  
+                          <p className="text-5xl font-semibold text-transparent bg-clip-text tracking-tight bg-gradient-to-br from-gray-900 to-transparent text-shadow">  
+                            {formatAmount(asset?.amount)}  
+                          </p>  
+                          <p className="text-3xl font-semibold text-transparent bg-clip-text bg-gradient-to-br from-gray-900 to-transparent">  
+                            {coins.find(c => c.chain_id === asset?.chain)?.symbol}  
+                          </p>  
+                          <p className="text-3xl font-semibold text-transparent bg-clip-text bg-gradient-to-br from-gray-900 to-transparent mt-4">  
+                            # {asset.id}  
+                          </p>  
+                        </div>  
+                      </Tilt>  
+                    </PopoverTrigger>  
+                    <PopoverContent  
+                      sideOffset={-20}  
+                      className="w-full p-0 bg-white shadow-lg rounded-lg border-none"  
+                    >  
+                      {chain?.id === 7001 ? (  
+                        <div className="flex gap-2">  
+                          <Button  
+                            disabled={assetsUpdating.includes(asset.id)}  
+                            onClick={() => burn(asset.id)}  
+                            className="hover:bg-red-500"  
+                          >  
+                            <Flame className="h-4 w-4" />  
+                          </Button>  
+                          <Popover>  
+                            <PopoverTrigger asChild>  
+                              <Button className="hover:bg-blue-500">  
+                                <Send className="h-4 w-4" />  
+                              </Button>  
+                            </PopoverTrigger>  
+                            <PopoverContent className="bg-white w-64 rounded-xl p-4 shadow-lg border-none">  
+                              <Input  
+                                disabled={assetsUpdating.includes(asset.id)}  
+                                placeholder="Recipient address"  
+                                value={recipient}  
+                                onChange={(e) => setRecipient(e.target.value)}  
+                                className="mb-2"  
+                              />  
+                              <Button  
+                                disabled={assetsUpdating.includes(asset.id)}  
+                                variant="outline"  
+                                onClick={() => transfer(asset.id)}  
+                              >  
+                                Transfer asset  
+                              </Button>  
+                            </PopoverContent>  
+                          </Popover>  
+                        </div>  
+                      ) : (  
+                        <Button  
+                          variant="secondary"  
+                          onClick={() => switchNetwork && switchNetwork(7001)}  
+                        >  
+                          Switch Network  
+                        </Button>  
+                      )}  
+                    </PopoverContent>  
+                  </Popover>  
+                </motion.div>  
+              );  
+            })}  
+        </AnimatePresence>  
+      </div>  
+    </div>  
+  </div>
   )
 }
 
